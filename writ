@@ -8,6 +8,31 @@ def withdraw(self, amount, source_account_num):
         self.dt.execute("update ACCOUNT set BALANCE = BALANCE + %s where ACCOUNT_NUM = %s", (amount, target_account_num))
 
 
+#checkingapi
+@app.route('/depositt', methods=['POST'])
+def depositt():
+     data = request.json
+     amount = data['amount']
+     total = data['amount'] + balancee
+     return str(total)
+
+
+ # amount = int(input('Enter the amount to withdraw:')) 
+        # pin =input('enter pin')
+          # email = input('enter email')
+
+#checkingapi
+@app.route('/withdraww', methods=['POST'])   
+def withdraww():
+    data = request.json
+    amount = data['amount']
+    if amount > balancee:
+        return jsonify('Insufficient Balance')
+    else:
+       total = balancee - data['amount']
+       return str(total)        
+
+
 
 @app.route('/history')
 def history():

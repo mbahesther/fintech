@@ -1,6 +1,5 @@
 
 import datetime
-from flask import render_template
 from apps import *
 from passlib.hash import pbkdf2_sha256 as sha256
 
@@ -58,21 +57,30 @@ def login():
 
 
 
-balancee = 10
 
-@app.route('/deposit')
+#deposit route
+@app.route('/deposit', methods=['GET'])
 def deposit():
-    email = input('enter email')
+    data = request.json
+    email = data['email']
+    
     my_cursor = mydb.cursor(MySQLdb.cursors.DictCursor)
     my_cursor.execute('SELECT * FROM register WHERE email = %s', [email])
     query = my_cursor.fetchone() 
     if query:
-        amount = int(input('Enter the amount to deposit:')) 
-        pin =input('enter pin')
-        typ = "deposit"
-        total = balancee + amount
+        amount = data['amount']
+        pin = data['pin']
+        typ = "deposit"             # type of transaction  
         now = datetime.datetime.now()
         dt_now = now.strftime("%d-%m-%Y %H:%M:%S")
+
+        my_cursor.execute('SELECT balance FROM register WHERE email = %s', [email])
+        user = my_cursor.fetchone()
+
+        carry = ''.join(map(str, user))      #change the tuple from the database to string
+        change_user = int(carry)             #change the string to int
+        total = change_user + amount
+
         my_cursor.execute('SELECT * FROM register WHERE email = %s', [email])
         queryy = my_cursor.fetchone()  
         if queryy and sha256.verify(pin, queryy[4]):
@@ -80,7 +88,7 @@ def deposit():
             my_cursor.execute("""UPDATE register SET balance=%s WHERE email = %s""", [total, email])  
             my_cursor.execute("INSERT INTO  transactions (email,amount,type,date) VALUES(%s,%s,%s,%s)", [email, amount, typ, dt_now])  
             mydb.commit()
-            return jsonify(str(amount) + " withdraw " + str(total) + ' your account account')
+            return jsonify(str(amount) + " Deposited " + " Remain " + str(total) + ' your account account')
         else:
             return jsonify("invalid pin")
     else:
@@ -89,51 +97,41 @@ def deposit():
             
            
         
- 
-
-#checkingapi
-@app.route('/depositt', methods=['POST'])
-def depositt():
-     data = request.json
-     amount = data['amount']
-     total = data['amount'] + balancee
-     return str(total)
-   
-
-@app.route('/withdraw')   
+#withdraw route
+@app.route('/withdraw', methods=['GET'])   
 def withdraw():
-    email = input('enter email')
+    data = request.json
+    email = data['email']
 
     my_cursor = mydb.cursor(MySQLdb.cursors.DictCursor)
     my_cursor.execute('SELECT * FROM register WHERE email = %s', [email])
     query = my_cursor.fetchone() 
     if query:
-        amount = int(input('Enter the amount to withdraw:')) 
-        pin =input('enter pin')
-        typ = "withdraw"
+        amount = data['amount']
+        pin = data['pin']
+        typ = "withdraw"       #type of transaction
+        now = datetime.datetime.now()
+        dt_now = now.strftime("%d-%m-%Y %H:%M:%S")
+
         my_cursor.execute('SELECT balance FROM register WHERE email = %s', [email])
-        query = my_cursor.fetchone()
-        print(query)
+        user = my_cursor.fetchone()
         
-        carry = ''.join(map(str, query))  #change the tuple to string
-        change_query = int(carry)     #change the string to int
+        carry = ''.join(map(str, user))  #change the tuple from the database to string
+        change_user = int(carry)     #change the string to int
        
-        if amount >= change_query :
+        if amount >= change_user :
             return jsonify('insufficient account')
         else:
 
-            total = change_query - amount
-            now = datetime.datetime.now()
-            dt_now = now.strftime("%d-%m-%Y %H:%M:%S")
+            total = change_user - amount
             my_cursor.execute('SELECT * FROM register WHERE email = %s', [email])
             queryy = my_cursor.fetchone()  
         if queryy and sha256.verify(pin, queryy[4]):
-            print(queryy)
-
+        
             my_cursor.execute("""UPDATE register SET balance=%s WHERE email = %s""", [total, email])  
             my_cursor.execute("INSERT INTO  transactions (email,amount,type,date) VALUES(%s,%s,%s,%s)", [email, amount, typ, dt_now])  
             mydb.commit()
-            return jsonify ( str(amount) + " withdraw " + str(total)+' your account account')
+            return jsonify ( str(amount) + " withdraw, " + " Remain " + str(total)+' your account account')
         else:
             return jsonify("invalid pin")
     else:
@@ -141,21 +139,22 @@ def withdraw():
            
                
 
-#checkingapi
-@app.route('/withdraww', methods=['POST'])   
-def withdraww():
-    data = request.json
-    amount = data['amount']
-    if amount > balancee:
-        return jsonify('Insufficient Balance')
-    else:
-       total = balancee - data['amount']
-       return str(total)        
 
-
-@app.route('/history')
+@app.route('/history', methods=['GET'])
 def history():
-    pass
+    data = request.json
+    email = data['email']
+   
+    my_cursor = mydb.cursor(MySQLdb.cursors.DictCursor)
+    my_cursor.execute('SELECT * FROM register WHERE email = %s', [email])
+    query = my_cursor.fetchone()
+    if query:
+        my_cursor.execute('SELECT * FROM transactions WHERE email = %s', [email])
+        user = my_cursor.fetchall()
+        return jsonify(user)
+    else:
+        return jsonify('email is not registered')
+
 
 
 if __name__ == '__main__':
