@@ -1,0 +1,37 @@
+def withdraw(self, amount, source_account_num):
+        self.checkForSufficientFunds(self.balance(source_account_num), amount)
+        self.dt.execute("update ACCOUNT set BALANCE = BALANCE - %s where ACCOUNT_NUM = %s", (amount, source_account_num))
+
+    def deposit(self, amount, target_account_num):
+        # Implicitly testing for valid account number
+        self.balance(target_account_num)
+        self.dt.execute("update ACCOUNT set BALANCE = BALANCE + %s where ACCOUNT_NUM = %s", (amount, target_account_num))
+
+
+
+@app.route('/history')
+def history():
+
+  
+  print("1. Deposit money 2. withdraw 3. view details")
+  choice = int(input('enter choice:'))
+
+    
+  if choice ==1:
+    email = input('enter email')
+    deposit = int(input(' enter amount'))
+    typ = 'deposit'
+    now = datetime.now()
+    my_cursor = mydb.cursor(MySQLdb.cursors.DictCursor)
+    my_cursor.execute('''INSERT INTO transactions(email, amount, type, date) VALUES (%s, %s, %s, %s)''', (email,deposit, typ, now))
+    # my_cursor.execute("update register set balance=balance+'" +str(deposit) + "' where email='" + email + "'")
+    print(deposit,"is successful")
+  elif choice ==2:
+        withdraw = int(input('amount'))
+        typ = 'withdraw'
+        now = datetime.now()
+  else:
+        return ('invalid request')    
+
+
+
