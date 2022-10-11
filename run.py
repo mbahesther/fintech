@@ -9,6 +9,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['SQLACHEMY_DATABASE_URI'] = 'postgres://abdbydvidkxekc:f56796c4310c3ef6456fe376681d75c9e63aa1af103a43e887019907a5b63e98@ec2-3-213-66-35.compute-1.amazonaws.com:5432/d3cuo5olh7pkr4'
 #app.config['SQLACHEMY_DATABASE_URI'] = 'mysql+pymysql://root:''@localhost/fintech'
+db = SQLAlchemy(app)
 
 mydb = mysql.connector.connect(
     host = 'localhost',
