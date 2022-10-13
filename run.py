@@ -7,9 +7,7 @@ import MySQLdb.cursors
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
-app.config['SQLACHEMY_DATABASE_URI'] = 'postgres://abdbydvidkxekc:f56796c4310c3ef6456fe376681d75c9e63aa1af103a43e887019907a5b63e98@ec2-3-213-66-35.compute-1.amazonaws.com:5432/d3cuo5olh7pkr4'
-#app.config['SQLACHEMY_DATABASE_URI'] = 'mysql+pymysql://root:''@localhost/fintech'
-db = SQLAlchemy(app)
+app.config['SQLACHEMY_DATABASE_URI'] = 'mysql+pymysql://root:''@localhost/fintech'
 
 mydb = mysql.connector.connect(
     host = 'localhost',
@@ -20,7 +18,8 @@ mydb = mysql.connector.connect(
 
 my_cursor = mydb.cursor()
 
-my_cursor.execute( '''CREATE TABLE IF NOT EXISTS user_register (
+
+my_cursor.execute( '''CREATE TABLE IF NOT EXISTS register (
 	id INT(11) NOT NULL AUTO_INCREMENT,
 	fullname	VARCHAR(50) NOT NULL,
 	email	VARCHAR(120) NOT NULL,
@@ -45,4 +44,5 @@ my_cursor.execute( '''CREATE TABLE IF NOT EXISTS transactions (
 )
 ''')
 mydb.commit()
+
 
